@@ -10,6 +10,7 @@
 
 		<style type="text/css">
 
+<<<<<<< HEAD
 		div.tooltip {
 		  position:absolute;
 			width:auto;
@@ -29,6 +30,8 @@
 	  font-size:12px;
 	} */
 
+=======
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
 
 		</style>
 	</head>
@@ -47,9 +50,12 @@
 		var projection = d3.geo.albersUsa()
 				.translate([width/2, height/2]);
 
+<<<<<<< HEAD
 		var tooltip = d3.select('body').append('div')
 			.attr('class', 'hidden tooltip');
 
+=======
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
 		// path: geo JSOn to svg
 		var path = d3.geo.path().projection(projection);
 
@@ -57,14 +63,18 @@
     var candidateChoice = "Bernie Sanders";
     //array that will hold races of chosen candidate
     var thisCandidate = [];
+<<<<<<< HEAD
 		var dem = [];
 		var rep = [];
+=======
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
 
     // create our coloring tool
     var color = d3.scale.quantize()
         .range(colorbrewer.Greys[8].reverse());
         //.range(colorbrewer.YlGnBu[8].reverse());
 
+<<<<<<< HEAD
 		var colorParty = d3.scale.ordinal()
     		.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
@@ -73,6 +83,13 @@
     var candidateMenu = d3.select("#cmetrics");
     for(var i = 0; i < candidateList.length; i++){
       //console.log(candidateList[i]);
+=======
+    var candidateList = ["Bernie Sanders", "Ben Carson", "Carly Fiorina", "Chris Christie", "Donald Trump", "Hillary Clinton", "Jeb Bush", "John Kasich", "Marco Rubio", "Martin O'Malley", "Mike Huckabee", "Rand Paul", "Rick Santorum", "Ted Cruz"];
+
+    var candidateMenu = d3.select("#cmetrics");
+    for(var i = 0; i < candidateList.length; i++){
+      console.log(candidateList[i]);
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
       candidateMenu.append("option").attr("value", candidateList[i]).text(candidateList[i]);
     }
 
@@ -86,6 +103,7 @@
               // set the domain for our color scale now that we have data
                 color.domain(d3.extent(primaryData, function (d) {return +d.prop;	}));
 
+<<<<<<< HEAD
 	primaryData.forEach(function(d){
 		if(d.candidate == "Bernie Sanders" || d.candidate == "Hillary Clinton"){
 			dem.push(d);
@@ -188,6 +206,8 @@
 
 	}
 
+=======
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
   var vis = function(){
             primaryData.forEach(function(d){
               if(d.candidate == candidateChoice){
@@ -201,7 +221,10 @@
       				// correspondng to a particular state
       				var censusMap = d3.map();
       				thisCandidate.forEach(function(d){censusMap.set(d.state,d)});
+<<<<<<< HEAD
 							console.log(censusMap);
+=======
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
 
       				// loop through all of the path data, attaching the appropriate
       				// record to each one based on the name
@@ -216,6 +239,10 @@
       				.enter()
       				.append("path")
       				.attr("d", path)
+<<<<<<< HEAD
+=======
+      				.attr("class","state");
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
 
               // style each state to set the fill color based on our metric
       				states.style("fill", function(d){
@@ -225,6 +252,7 @@
       						return "red";
       					}
 
+<<<<<<< HEAD
       				})
 
               states.on("mouseover", function(d){
@@ -262,6 +290,29 @@
 							else{
               thisCandidate = [];
               vis();}
+=======
+      				});
+
+              states.on("mouseover", function(d){
+                if (d.properties.value){
+                  console.log(d.properties.value.prop);
+                    }
+                else {
+                  console.log("candidate did not compete");
+                }
+              });
+
+}
+      vis();
+
+      d3.select("#candidateSelect").on("change", function(){
+              console.log("hello");
+              candidateChoice = this.value;
+              console.log(this.value);
+              svg.selectAll("path").remove();
+              thisCandidate = [];
+              vis();
+>>>>>>> ad8f219b0adbdc3f60a3ae7cc5d78995fdef3b2b
             });
 
           });
