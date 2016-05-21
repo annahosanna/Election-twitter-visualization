@@ -9,7 +9,35 @@
 		<script src="http://d3js.org/colorbrewer.v1.min.js"></script>
 
 		<style type="text/css">
+/*Style for map*/
+		div.tooltip {
+			position:absolute;
+			width:auto;
+			height:auto;
+			padding:10px;
+			background-color: #fff;
+			border-radius:2px;
+	}
 
+	div.tooltipParty {
+		position: absolute;
+		width: 260;
+		height: auto;
+		padding: 10px;
+		background-color: #fff;
+		border-radius:2px;
+	}
+
+	.hidden{
+		display:none;
+	}
+
+	.legend rect {
+	fill:white;
+	stroke:black;
+	opacity:0.8;}
+
+/*Style for themeriver*/
   path {
     stroke-width: 1;
     fill: none;
@@ -56,12 +84,301 @@
 		<div id="info" class="hidden">
 			<p><span id="candidate">Value 1</span></p>
 		</div>
-		<p> Theme River showing twitter "buzz" by state over the course of 36 weeks.</p>
-		<p> In the works: nice display for weekly intervals + transitions between graphs</p>
 
 		<p>State: <select id="stateSelect"><optgroup label="States" id="cmetrics"></optgroup></select></p>
+		<p>Candidate: <select id="candidateSelect"><optgroup label="Candidates" id="cmetricsCandidate"></optgroup></select></p>
 
 		<script type="text/javascript">
+
+
+				// SVG region
+				var widthMap = 800, heightMap = 500;
+
+				var svgMap = d3.select("body")
+						.append("svg")
+						.attr({"width":widthMap, "height":heightMap});
+
+				// projection that maps from latitude &longitude to x & y coordiantes
+				var projection = d3.geo.albersUsa()
+						.translate([widthMap/2, heightMap/2]);
+
+				var tooltip = d3.select('body').append('div')
+					.attr('class', 'hidden tooltip');
+
+					var tooltipParty = d3.select('body').append('div')
+						.attr('class', 'hidden tooltip');
+
+				// path: geo JSOn to svg
+				var path = d3.geo.path().projection(projection);
+
+				var svgLegend = d3.selectAll("body")
+								.append("svg");
+
+
+		    //array that will hold races of chosen candidate
+		    var thisCandidate = [];
+				var dem = [];
+				var rep = [];
+
+		    // create our coloring tool
+		    var color = d3.scale.quantize()
+		        .range(colorbrewer.Greys[8].reverse());
+		        //.range(colorbrewer.YlGnBu[8].reverse());
+
+				var colorParty = d3.scale.ordinal()
+		    		.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+		    var candidateList = ["Bernie Sanders", "Ben Carson", "Carly Fiorina", "Chris Christie", "Donald Trump", "Hillary Clinton", "Jeb Bush", "John Kasich", "Marco Rubio", "Martin O'Malley", "Mike Huckabee", "Rand Paul", "Rick Santorum", "Ted Cruz", "Democrats", "Republicans"];
+
+		    var candidateMenu = d3.select("#cmetricsCandidate");
+		    for(var i = 0; i < candidateList.length; i++){
+		      //console.log(candidateList[i]);
+		      candidateMenu.append("option").attr("value", candidateList[i]).text(candidateList[i]);
+		    }
+
+
+
+		          // fetch our data -- first the map, and then the CSV data (the order matters little here since we
+		      		// are not displaying anything until the binding is done)
+		      		d3.json("http://www.cs.middlebury.edu/~candrews/classes/infovis/data/us-states.json", function(mapData){
+								d3.csv("states.csv", function(statesList){
+		      			d3.csv("final_primary_data.csv", function (primaryData) {
+
+		              // set the domain for our color scale now that we have data
+		                color.domain(d3.extent(primaryData, function (d) {return +d.prop;	}));
+
+			primaryData.forEach(function(d){
+				if(d.candidate == "Bernie Sanders" || d.candidate == "Hillary Clinton"){
+					dem.push(d);
+				}
+				else{
+					rep.push(d);
+				}
+			})
+
+			dem = d3.nest()
+					.key(function(d) {return d.state;})
+					.entries(dem);
+			rep = d3.nest()
+					.key(function(d) {return d.state;})
+					.entries(rep);
+
+			dem.forEach(function(d){
+				d["winner"] = null;
+				d["percentage"] = null;
+				d.values.forEach(function(s){
+					if (s.prop > d["percentage"]){
+						d["percentage"] = s.prop;
+						d["winner"] = s.candidate;
+					}
+				});
+			})
+
+			rep.forEach(function(d){
+				d["winner"] = null;
+				d["percentage"] = null;
+				d.values.forEach(function(s){
+					if (s.prop > d["percentage"]){
+						d["percentage"] = s.prop;
+						d["winner"] = s.candidate;
+					}
+				});
+			})
+
+
+
+			var visParty = function(){
+
+
+				for (var i = 0; i < mapData.features.length; i++){
+					var name = mapData.features[i].properties.name;
+					var test = 0;
+					partyArr.forEach(function(d){
+						if(name === d.key){
+							d.geometry = mapData.features[i].geometry;
+							d.type = mapData.features[i].type;
+							test = 10;
+						}
+					})
+					if(test == 0){
+						newObj = {key: name, geometry: mapData.features[i].geometry, type: mapData.features[i].type};
+						partyArr.push(newObj);
+					}
+				}
+
+
+				var statesParty = svgMap.selectAll("path")
+						.data(partyArr)
+						.enter()
+						.append("path")
+						.attr("d", path)
+						.attr("data-legend",function(d) {return d.winner})
+
+		//console.log(statesParty);
+						// style each state to set the fill color based on our metric
+						statesParty.style("fill", function(d){
+							return colorParty(d.winner);
+						})
+						//console.log(partyArr);
+						statesParty.on("mouseover", function(d){
+								var mouse = d3.mouse(svgMap.node()); //?????????????????????????????????????????????????
+								var len = d.values.length;
+								var tooltipText = "<p>" + d.key + ": </p>";
+								for(var i = 0; i < len; i++){
+									tooltipText += "<p>" + d.values[i].candidate + ":" + d.values[i].prop + "</p>"}
+								if(tooltipText === "<p>" + d.key + ": </p>"){
+										tooltipText += "Primary has not been held"
+								}
+								tooltip.html(tooltipText);
+								tooltip.classed('hidden', false)
+										.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+								})
+						.on('mousemove', function(d, i) {
+							var mouse = d3.mouse(svgMap.node()); //?????????????????????????????????????????????????????
+							tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+						})
+
+						.on("mouseout", function(d){
+							tooltip.classed('hidden', true)
+						})
+
+				//console.log(partyArr);
+				winner = [];
+				partyArr.forEach(function(d){
+					var test = 0;
+					for(var y = 0; y < winner.length; y++){
+						if (d.winner === winner[y]){
+							test = 10;
+						}
+					}
+					if(test == 0){
+						winner.push(d.winner);
+					}
+				})
+				//console.log(winner);
+				var legend = svgLegend.selectAll(".legend")
+						.data(winner)
+						.enter().append("g")
+						.attr("class", "legend")
+						//.attr("transform", function(d, i) { return "translate(0" + 130 + ")"});
+
+
+				legend.append("text")
+					.attr("x", 195)
+					.attr("y", function(d, i){return i * 21 + 40})
+					.attr("dy", ".35em")
+					.style("text-anchor", "end")
+					.text(function(d) {
+						if(d !== undefined){ return d;}
+						else{return "Primary has not been held"}
+					})
+
+					legend.append("rect")
+							.attr("x", 200)
+							.attr("y", function(d, i){return i * 20 +33})
+							.attr("width", 18)
+							.attr("height", 18)
+							.style("fill", function(d) {return colorParty(d)});
+
+			}
+
+		  var vis = function(){
+		            primaryData.forEach(function(d){
+		              if(d.candidate == candidateChoice){
+		                thisCandidate.push(d);
+		              }
+		            })
+
+		      				// create a map of our census data, so we can easily find records
+		      				// correspondng to a particular state
+		      				var censusMap = d3.map();
+		      				thisCandidate.forEach(function(d){censusMap.set(d.state,d)});
+									//console.log(censusMap);
+
+		      				// loop through all of the path data, attaching the appropriate
+		      				// record to each one based on the name
+		      				for (var i = 0; i < mapData.features.length; i++){
+		      					var name = mapData.features[i].properties.name;
+		      					mapData.features[i].properties.value = censusMap.get(name);
+		      				}
+									//console.log(mapData.features);
+		      				// create the states in the SVG
+		      				var states = svgMap.selectAll("path")
+		      				.data(mapData.features)
+		      				.enter()
+		      				.append("path")
+		      				.attr("d", path)
+		//console.log(states);
+		              // style each state to set the fill color based on our metric
+		      				states.style("fill", function(d){
+										console.log(d);
+		      					if (d.properties.value){
+		      						return color(+d.properties.value.prop);
+		      					}	else{
+		      						return "red";
+		      					}
+
+		      				})
+
+		              states.on("mouseover", function(d){
+											var mouse = d3.mouse(svgMap.node());
+											console.log(d);
+										if(d.properties.value){
+											tooltip.classed('hidden', false)
+													.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+													.html(d.properties.value.prop);
+												}
+										else{
+											tooltip.classed('hidden', false)
+													.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+													.html("Candidate did not compete in this race");
+												}
+										})
+									.on('mousemove', function(d, i) {
+										var mouse = d3.mouse(svgMap.node());
+										tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+									})
+									.on("mouseout", function(d){
+										tooltip.classed('hidden', true)
+									})
+				}
+				partyArr = dem;
+				visParty();
+
+
+
+		      d3.select("#candidateSelect").on("change", function(){
+		              candidateChoice = this.value;
+									svgMap.selectAll("path").remove();
+									svgLegend.selectAll(".legend").remove();
+		              if(candidateChoice === "Democrats"){
+										partyArr = dem;
+										visParty();
+									}
+									if(candidateChoice === "Republicans"){
+										partyArr = rep;
+										visParty();
+									}
+									else{
+		              thisCandidate = [];
+		              vis();}
+		            });
+
+		          });
+		        });
+					});
+
+
+
+
+
+
+
+
+
+
+
+
 
 		var margin = {
 		top: 20,
@@ -203,17 +520,25 @@
 				 var info = d3.select("#info");
          info.select("#candidate").text(d.key);
 
-         var coordinates = d3.mouse(svg.node());
-         var bbox = svg.node().getBoundingClientRect();
+         var mouse = d3.mouse(svg.node());
+         /*var bbox = svg.node().getBoundingClientRect();
          coordinates[0] += bbox.left;
-         coordinates[1] += bbox.top;
+         coordinates[1] += bbox.top; */
 
-         info.style({
-           left: (coordinates[0] + 25) + "px",
+         info
+				 /*.style({
+           left: (coordinates[0] ) + "px",
            top: (coordinates[1] ) + "px",
-         })
-         .classed("hidden", false);
+         }) */
+         .classed("hidden", false)
+				 .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px' )
 			 })
+
+			 .on('mousemove', function(d, i) {
+				 var mouse = d3.mouse(svg.node()); //?????????????????????????????????????????????????????
+				 tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+			 })
+
 				 .on("mouseout", function(d, i) {
 			     svg.selectAll(".layer")
 			      .transition()
