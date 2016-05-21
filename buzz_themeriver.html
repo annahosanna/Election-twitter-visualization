@@ -15,18 +15,19 @@
 			width:auto;
 			height:auto;
 			padding:10px;
-			background-color: #fff;
-			border-radius:2px;
+			background-color:white;
+		  border-radius:10px;
+		  box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
 	}
 
-	div.tooltipParty {
+	/*div.tooltipParty {
 		position: absolute;
 		width: 260;
 		height: auto;
 		padding: 10px;
 		background-color: #fff;
 		border-radius:2px;
-	}
+	} */
 
 	.hidden{
 		display:none;
@@ -201,7 +202,7 @@
 						}
 					})
 					if(test == 0){
-						newObj = {key: name, geometry: mapData.features[i].geometry, type: mapData.features[i].type};
+						newObj = {key: name, geometry: mapData.features[i].geometry, type: mapData.features[i].type, values: null};
 						partyArr.push(newObj);
 					}
 				}
@@ -221,26 +222,35 @@
 						})
 						//console.log(partyArr);
 						statesParty.on("mouseover", function(d){
-								var mouse = d3.mouse(svgMap.node()); //?????????????????????????????????????????????????
-								var len = d.values.length;
-								var tooltipText = "<p>" + d.key + ": </p>";
-								for(var i = 0; i < len; i++){
-									tooltipText += "<p>" + d.values[i].candidate + ":" + d.values[i].prop + "</p>"}
-								if(tooltipText === "<p>" + d.key + ": </p>"){
-										tooltipText += "Primary has not been held"
-								}
+								var mouse = d3.mouse(svgMap.node());
+								var tooltipText = "<p>" + d.key + ": </br>";
+
+									if(typeof d.values === null){
+
+											tooltipText += "Primary has not been held";
+									}
+									else{
+											var len = d.values.length;
+											for(var i = 0; i < len; i++){
+													tooltipText += d.values[i].candidate + ":" + d.values[i].prop + "</br>";
+									} }
+
 								tooltip.html(tooltipText);
 								tooltip.classed('hidden', false)
-										.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+										.attr('style', 'left:' + (mouse[0] + 20) + 'px; top:' + (mouse[1]) + 'px')
 								})
 						.on('mousemove', function(d, i) {
 							var mouse = d3.mouse(svgMap.node()); //?????????????????????????????????????????????????????
-							tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+							tooltip.attr('style', 'left:' + (mouse[0] + 15) + 'px; top:' + (mouse[1]) + 'px')
 						})
 
 						.on("mouseout", function(d){
 							tooltip.classed('hidden', true)
 						})
+
+						.on("click", function(d) {
+  							draw(nestedDataState, d.key);
+						});
 
 				//console.log(partyArr);
 				winner = [];
@@ -377,9 +387,6 @@
 
 
 
-
-
-
 		var margin = {
 		top: 20,
 		right: 30,
@@ -476,6 +483,8 @@
 
 		});
 
+		
+
 		var draw = function(data, choice) {
 
 			//filter to state, returns list of one obj from nestedArray, so we index to it, and look at it's values
@@ -531,12 +540,12 @@
            top: (coordinates[1] ) + "px",
          }) */
          .classed("hidden", false)
-				 .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px' )
+				 .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1] + 600) + 'px' )
 			 })
 
 			 .on('mousemove', function(d, i) {
 				 var mouse = d3.mouse(svg.node()); //?????????????????????????????????????????????????????
-				 tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+				 tooltip.attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1] + 600) + 'px')
 			 })
 
 				 .on("mouseout", function(d, i) {
