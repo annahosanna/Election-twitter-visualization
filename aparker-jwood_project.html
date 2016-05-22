@@ -1,0 +1,770 @@
+<!DOCTYPE html >
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>
+			Twitter "Buzz" ThemeRiver
+		</title>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+
+		<style type="text/css">
+
+
+		#vis {
+			margin-left: auto;
+			margin-right: auto;
+			width: 970px;
+		}
+
+		div.tooltip {
+			position: absolute;
+			width: auto;
+			height: auto;
+			padding: 10px;
+			background-color: #fff;
+			border-radius: 10px;
+			box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+			margin: 0;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		.legend rect {
+			fill: #fff;
+			stroke: #000;
+			opacity: .8;
+		}
+
+		path {
+			stroke-width: 3;
+			fill: none;
+		}
+
+		.axis {
+			shape-rendering: crispEdges;
+		}
+
+		.x.axis line {
+			stroke: #d3d3d3;
+		}
+
+		.x.axis .minor {
+			stroke-opacity: .5;
+		}
+
+		.x.axis path {
+			display: none;
+		}
+
+		.y.axis line,.y.axis path {
+			fill: none;
+			stroke: #000;
+			stroke-width: 1px;
+		}
+
+		#info {
+			position: absolute;
+			width: 100px;
+			height: auto;
+			padding: 10px;
+			background-color: #fff;
+			border-radius: 10px;
+			box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+		}
+
+		#info.hidden {
+			display: none;
+		}
+
+		#info p {
+			margin: 0;
+		}
+
+		#map {
+			float: left;
+			height: 350px;
+		}
+
+		#themeriver {
+			float: bottom;
+			clear: left;
+		}
+
+		#mapLegend {
+			float: left;
+		}
+
+		path.layer {
+			stroke: #fff;
+			stroke-width: .5px;
+		}
+
+		#aside {
+			float: left;
+			padding-top: 20px;
+			font-size: 15px;
+			width: 400px;
+		}
+
+		#text {
+			clear: both;
+			padding-left: 40px;
+			padding-right: 40px;
+			padding-top: 0px;
+			font-size: 15px;
+			width: 880px;
+		}
+		#smallText {
+			float:left;
+			padding-left: 40px;
+			padding-right: 40px;
+			font-size: 15px;
+			padding-top: 20px;
+			padding-bottom: 20px;
+			width: 400px;
+		}
+
+		#textContainer{
+			margin-left: auto;
+			margin-right: auto;
+			width: 970px;
+		}
+		p {
+			text-align: justify;
+		}
+
+
+		</style>
+	</head>
+	<body>
+		<h1><center>Political “Buzz” and the Race for the White House.</center></h1>
+		<p> <center>Joy Wood and Anna Parker</center> <p>
+
+		<div id="info" class="hidden">
+			<p><span id="candidate">Value 1</span></p>
+		</div>
+		<div id = "vis">
+		<div id = "mapContainer">
+			<div id = "map"></div>
+			<div id = "mapLegend">
+				<p>Candidate: <select id="candidateSelect"><optgroup label="Candidates" id="cmetricsCandidate" style="float: left;"></optgroup></select></p>
+			</div>
+		</div>
+		<div id = "themeriver">
+</div>
+<input name="updateButton" type="button" value="Reset" id = "button" onclick= "update()" ><br>
+
+	</div>
+
+	<div id = "textContainer">
+	<div id = "smallText">
+		<p> <b>Map:</b> Our map represents the results of the 2016 political primaries.  Using the dropdown menu, choose either a specific candidate or a political party to view.
+		<p> If a candidate is selected, states are colored according to the percentage of votes won by that candidate in a state.  Mouseover a state to see the percentage won by the chosen candidate in that state.
+		<p> If a party is selected, states are colored according to the winner of that state’s primary.  Mouseover a state to see a breakdown of all the candidates who competed in that state’s primary.
+		<p> *Dark grey indicates that either a state’s primary has not yet occurred or the selected candidate did not compete in that primary.
+</div>
+
+	<div id = "smallText">
+		<p> <b>Themeriver:</b> Our themeriver represents the amount of twitter buzz surrounding each candidate over the course of the primary season.
+		<p> Each “stream” of color represents a different candidate, and the width of the stream represents the amount of times a candidate's name was mentioned or a tweet with a character's name was interacted with.
+		<p> Click on a state to view the twitter data for that specific state in the themeriver. Click the reset button (next to the themeriver) to return to the original view of the twitter data for the entire country.
+		<p> Mouseover any state and the themeriver will highlight the section in which that state’s primary took place.
+	</div>
+	<div id = "text">
+		<b><p><center> Political “Buzz” and the Race for the White House.</center></b>
+		<p> The concept of this visualization was born from the observation that in America, country-wide races are about more than a candidate’s experience, their record or their position on issues.  If that were true, why would candidates pay college graduates to run their twitter and facebook accounts?  Why would President Obama appear on “The Tonight Show” four times as a sitting president?  It seems that American voters, that varied red, white and blue mass, need to be interested.  To earn this “American” vote, candidates must be talked about.  They must be engaging, funny, charming, attractive, disgusting—anything, as long as someone’s talking about it.  Candidates must generate a buzz.
+		<p> Of course, this is difficult, perhaps impossible, to quantify.  What is buzz? How do you know what people think about, what they find interesting, what they talk about with their friends? Where do you look?
+		<p> We decided to quantify buzz using twitter data.  Of course this is not a perfect representation—political buzz is generated from and with many other mediums.
+			But in a broad sense, people tweet about a candidate because they find them interesting—because they want to comment on something a candidate’s done or said.
+		<p> Note that, in this twitter data, we do not differentiate between the positive and the negative.  We want to visualize the relationship between a candidate’s political success and the amount of conversation about this candidate, not the type of conversation.  By comparing this quantity of buzz to the success or failure of different candidates in the 2016 primary elections, we have created a visualization that explores the question: Has political buzz influenced the 2016 United States presidential primary elections?  We hope this visualization will interest anyone who has an interest in the state of the American political system.
+	</div>
+	</div>
+
+
+
+		<script type="text/javascript">
+	var margin = {
+	top: 20,
+	right: 30,
+	bottom: 30,
+	left: 40
+};
+
+var width = 850;
+var height = 300;
+var mindate = new Date(2015, 8, 5);
+var maxdate = new Date(2016, 4, 14);
+
+var x = d3.scale.linear()
+	.range([0, width]);
+
+var t = d3.time.scale()
+	.domain([mindate, maxdate])
+	.range([0, width]);
+
+
+var y = d3.scale.linear()
+	.range([height, 0]);
+
+var colorScale = d3.scale.ordinal().range(['#9e0142', '#d53e4f', '#f46d43',
+	'#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
+]);
+
+var yAxis = d3.svg.axis()
+	.ticks(0)
+	.scale(y);
+
+var xAxis = d3.svg.axis()
+	.scale(x)
+	.orient("bottom");
+
+var tAxis = d3.svg.axis()
+	.scale(t)
+	.orient("bottom");
+
+var stack = d3.layout.stack()
+	.offset("wiggle")
+	.values(function(d) {
+		return d.values;
+	})
+	.x(function(d) {
+		return +d.date;
+	})
+	.y(function(d) {
+		return +d.count;
+	});
+
+var svgTheme = d3.select("#themeriver").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var area = d3.svg.area()
+	.interpolate("cardinal")
+	.x(function(d) {
+		return x(d.date);
+	})
+	.y0(function(d) {
+		return y(d.y0);
+	})
+	.y1(function(d) {
+		return y(d.y0 + d.y);
+	});
+
+//for dropdown
+var allStates = ['Wyoming', 'Wisconsin', 'West Virginia', 'Washington DC',
+	'Washington', 'Virginia', 'Vermont', 'Utah', 'Texas', 'Tennessee',
+	'South Dakota', 'South Carolina', 'Rhode Island', 'Pennsylvania', 'Oregon',
+	'Oklahoma', 'Ohio', 'North Dakota', 'North Carolina', 'New York',
+	'New Mexico', 'New Jersey', 'New Hampshire', 'Nevada', 'Nebraska', 'Montana',
+	'Missouri', 'Mississippi', 'Minnesota', 'Michigan', 'Massachusetts',
+	'Maryland', 'Maine', 'Louisiana', 'Kentucky', 'Kansas', 'Iowa', 'Indiana',
+	'Illinois', 'Idaho', 'Hawaii', 'Georgia', 'Florida', 'Delaware',
+	'Connecticut', 'Colorado', 'California', 'Arkansas', 'Arizona', 'Alaska',
+	'Alabama', 'All States'
+];
+
+//setup dropdown
+var stateMenu = d3.select("#cmetrics");
+for (var i = 0; i < allStates.length; i++) {
+	stateMenu.append("option").attr("value", allStates[i]).text(allStates[i]);
+}
+var outsideData;
+
+//load data and draw initial
+d3.csv("buzz_final.csv", function(dataset) {
+
+	//nest data by state
+	nestedDataState = d3.nest().key(function(d) {
+			return d.state;
+		})
+		.entries(dataset);
+	outsideData = nestedDataState;
+	draw(nestedDataState, "All States");
+
+	//on change redraw
+	d3.select("#stateSelect").on("change", function() {
+		svgTheme.selectAll("rect").style("opacity", 0);
+		stateChoice = this.value;
+		svgTheme.selectAll("path").remove();
+		draw(nestedDataState, stateChoice);
+	});
+
+
+});
+
+var draw = function(data, choice) {
+	d3.selectAll(".axis").remove();
+
+	//filter to state, returns list of one obj from nestedArray, so we index to it, and look at it's values
+	var test = data.filter(function(d) {
+		return d.key == choice;
+	})[0].values;
+
+	//we then nest to each candidate to create "layers" for our graph
+	var nestedDataLayers = d3.nest().key(function(d) {
+			return d.candidate;
+		})
+		.entries(test);
+
+	//stack to get y offset
+	var layers = stack(nestedDataLayers);
+
+	//36 weeks, may change this later
+	x.domain([0, 36]);
+	//finding max height of every layer in nested data
+	y.domain([0, d3.max(nestedDataLayers, function(d, i) {
+		return d3.max(d.values, function(e) {
+			return e.y0 + e.y;
+		})
+	})]);
+
+	var rWidth = width / 37;
+	var rectTimeArray = Array.apply(0, Array(36)).map(function(d, i) {
+		return i;
+	});
+
+	var timeRects = svgTheme.append("g")
+		.selectAll("rect")
+		.data(rectTimeArray)
+		.enter()
+		.append("rect")
+		.attr("x", function(d, i) {
+			return (i) * rWidth;
+		})
+		.attr("y", 0)
+		.attr("width", rWidth)
+		.attr("height", height)
+		.style("opacity", 0)
+		.attr("id", function(d, i) {
+			return "rect" + i;
+		});
+
+	svgTheme.selectAll(".layer")
+		.data(layers)
+		.enter().append("path")
+		.attr("class", "layer")
+		.attr("d", function(d) {
+			return area(d.values);
+		})
+		.style("fill", function(d, i) {
+			return colorScale(d.key);
+		})
+		.transition()
+		.duration(2500)
+		.attr("d", function(d) {
+			return area(d.values);
+		})
+
+
+	svgTheme.selectAll(".layer")
+		.attr("opacity", 1)
+
+	.on("mousemove", function(d, i) {
+			svgTheme.selectAll(".layer").transition()
+				.duration(250)
+				.attr("opacity", function(d, j) {
+					return j != i ? 0.6 : 1;
+				})
+
+			//show tooltip
+			var info = d3.select("#info");
+			info.select("#candidate").text(d.key);
+
+			var coordinates = d3.mouse(svgTheme.node());
+			var bbox = svgTheme.node().getBoundingClientRect();
+			coordinates[0] += bbox.left;
+			coordinates[1] += bbox.top;
+
+			info.style({
+					left: (coordinates[0] + 25) + "px",
+					top: (coordinates[1] + 30) + "px",
+				})
+				.classed("hidden", false);
+		})
+		.on("mouseout", function(d, i) {
+			svgTheme.selectAll(".layer")
+				.transition()
+				.duration(250)
+				.attr("opacity", "1");
+
+			var info = d3.select("#info");
+			info.classed("hidden", true);
+		});
+
+	svgTheme.append("g")
+		.attr("class", "y axis")
+		.attr("transform", "translate(" + (width) + ", 0)")
+		.call(yAxis.orient("left"));
+	svgTheme.append("g")
+		.attr("class", "y axis")
+		.attr("transform", "translate(" + 23 + ", 0)")
+		.call(yAxis.orient("right"));
+
+	svgTheme.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(tAxis);
+
+};
+
+function update() {
+	svgTheme.selectAll("rect").style("opacity", 0);
+	svgTheme.selectAll("path").remove();
+	draw(outsideData, "All States");
+};
+
+var widthMap = 600,
+	heightMap = 350;
+
+var svgMap = d3.select("#map")
+	.append("svg")
+	.attr("width", widthMap + margin.left + margin.right)
+	.attr("height", heightMap + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + (margin.left + 30) + ",0)");
+
+var projection = d3.geo.albersUsa()
+	.scale(750)
+	.translate([widthMap / 2, heightMap / 2]);
+
+var tooltip = d3.select('#map').append('div')
+	.attr('class', 'hidden tooltip');
+
+var tooltipParty = d3.select('#map').append('div')
+	.attr('class', 'hidden tooltip');
+
+var path = d3.geo.path().projection(projection);
+
+var svgLegend = d3.selectAll("#mapLegend")
+	.append("svg")
+	.attr("width", 300)
+	.attr("height", 300);
+
+
+var thisCandidate = [];
+var colorCandidate = d3.scale.linear();
+
+var colorParty = d3.scale.ordinal()
+	.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c",
+		"#ff8c00"
+	]);
+
+var candidateList = ["Bernie Sanders", "Ben Carson", "Carly Fiorina",
+	"Chris Christie", "Donald Trump", "Hillary Clinton", "Jeb Bush",
+	"John Kasich", "Marco Rubio", "Martin O'Malley", "Mike Huckabee", "Rand Paul",
+	"Rick Santorum", "Ted Cruz", "Democrats", "Republicans"
+];
+
+var candidateMenu = d3.select("#cmetricsCandidate");
+for (var i = 0; i < candidateList.length; i++) {
+	candidateMenu.append("option").attr("value", candidateList[i]).text(
+		candidateList[i]);
+}
+
+
+d3.json(
+	"http://www.cs.middlebury.edu/~candrews/classes/infovis/data/us-states.json",
+	function(mapData) {
+		d3.csv("primaries.csv", function(primaryData) {
+
+			var partyData = d3.nest()
+				.key(function(d) {
+					return d.party;
+				})
+				.entries(primaryData);
+
+
+			var dem = partyData.filter(function(d) {
+				return d.key == "D";
+			})[0].values;
+
+			var rep = partyData.filter(function(d) {
+				return d.key == "R";
+			})[0].values;
+
+			dem = d3.nest()
+				.key(function(d) {
+					return d.state;
+				})
+				.entries(dem);
+
+			rep = d3.nest()
+				.key(function(d) {
+					return d.state;
+				})
+				.entries(rep);
+
+			dem.forEach(function(d) {
+				d["winner"] = null;
+				d["percentage"] = null;
+				d["day"] = null;
+				d["bucket"] = null;
+				d.values.forEach(function(s) {
+					if (s.prop > d["percentage"]) {
+						d["percentage"] = s.prop;
+						d["winner"] = s.candidate;
+						d["day"] = s.date;
+						d["bucket"] = s.time_bucket;
+					}
+				});
+
+			})
+
+			rep.forEach(function(d) {
+				d["winner"] = null;
+				d["percentage"] = null;
+				d["day"] = null
+				d["bucket"] = null
+				d.values.forEach(function(s) {
+					if (s.prop > d["percentage"]) {
+						d["percentage"] = s.prop;
+						d["winner"] = s.candidate;
+						d["day"] = s.date;
+						d["bucket"] = s.time_bucket;
+					}
+				});
+
+			})
+
+			d3.select("#candidateSelect").on("change", function() {
+				svgTheme.selectAll("rect").style("opacity", 0);
+				candidateChoice = this.value;
+				svgMap.selectAll("path").remove();
+				svgLegend.selectAll(".legend").remove();
+				if (candidateChoice === "Democrats") {
+
+					visParty(mapData, dem, 2);
+				}
+				if (candidateChoice === "Republicans") {
+					visParty(mapData, rep, 5);
+
+				} else {
+					vis(primaryData, candidateChoice, mapData);
+				}
+			});
+
+			vis(primaryData, "Bernie Sanders", mapData);
+		})
+	});
+
+var visParty = function(mapD, pdata, partylen) {
+
+	for (var i = 0; i < mapD.features.length; i++) {
+		var name = mapD.features[i].properties.name;
+		var inParty = 0;
+		pdata.forEach(function(d) {
+			if (name === d.key) {
+				d.geometry = mapD.features[i].geometry;
+				d.type = mapD.features[i].type;
+				inParty = 10;
+			}
+		})
+		if (inParty == 0) {
+			newObj = {
+				key: name,
+				geometry: mapD.features[i].geometry,
+				type: mapD.features[i].type,
+				values: null
+			};
+			pdata.push(newObj);
+		}
+	}
+
+	var statesParty = svgMap.selectAll("path")
+		.data(pdata)
+		.enter()
+		.append("path")
+		.attr("d", path)
+		.attr("data-legend", function(d) {
+			return d.winner
+		})
+	var tooltipLeft = -300;
+	var tooltipTop = -30;
+
+	statesParty.style("fill", function(d, i) {
+			if (pdata[i].winner !== undefined) {
+				return colorScale(d.winner);
+			} else {
+				return "dimgrey";
+			}
+		})
+		.on("mouseover", function(d, i) {
+			var mouse = d3.mouse(svgMap.node());
+			var tooltipText = "<p><b>" + pdata[i].key + " </b></br>";
+
+			if (typeof d.values === null) {
+
+				tooltipText += "Primary has not been held";
+			} else {
+				var len = partylen;
+				tooltipText += "[" + pdata[i].day + "] </br>"
+				for (var l = 0; l < pdata[i].values.length; l++) {
+					tooltipText += pdata[i].values[l].candidate + ":" + " " + pdata[i].values[
+						l].prop + "% </br>";
+				}
+			}
+
+			tooltip.html(tooltipText);
+			tooltip.classed('hidden', false)
+				.attr('style', 'left:' + (mouse[0] - tooltipLeft) + 'px; top:' + (mouse[1] -
+					tooltipTop) + 'px')
+		})
+
+	.on('mousemove', function(d, i) {
+		var mouse = d3.mouse(svgMap.node()); //?????????????????????????????????????????????????????
+		tooltip.attr('style', 'left:' + (mouse[0] - tooltipLeft) + 'px; top:' + (
+			mouse[1] - tooltipTop) + 'px');
+	})
+
+	.on("mouseout", function(d) {
+		tooltip.classed('hidden', true)
+	})
+
+	.on("click", function(d, i) {
+		svgTheme.selectAll("rect").style("opacity", 0);
+		var selector = "#rect" + pdata[i].bucket
+		d3.select(selector).style("opacity", 0.1);
+		svgTheme.selectAll("path").remove();
+		draw(nestedDataState, pdata[i].key);
+	});
+
+	winner = [];
+	pdata.forEach(function(d) {
+		var test = 0;
+		for (var y = 0; y < winner.length; y++) {
+			if (d.winner === winner[y]) {
+				test = 10;
+			}
+		}
+		if (test == 0) {
+			winner.push(d.winner);
+		}
+	});
+	var legend = svgLegend.selectAll(".legend")
+		.data(winner)
+		.enter().append("g")
+		.attr("class", "legend");
+
+	legend.append("text")
+		.attr("x", 195)
+		.attr("y", function(d, i) {
+			return i * 21 + 40
+		})
+		.attr("dy", ".35em")
+		.style("text-anchor", "end")
+		.text(function(d) {
+			if (d !== undefined) {
+				return d;
+			} else {
+				return "Primary has not been held"
+			}
+		})
+
+	legend.append("rect")
+		.attr("x", 200)
+		.attr("y", function(d, i) {
+			return i * 20 + 33
+		})
+		.attr("width", 18)
+		.attr("height", 18)
+		.style("fill", function(d) {
+			if (d !== undefined) {
+				return colorScale(d)
+			} else {
+				return "dimgrey";
+			}
+		});
+}
+
+
+var vis = function(dataset, candidate, mapInfo) {
+	color = colorScale(candidate);
+	colorCandidate.range(["lightgrey", color]);
+	var candidateArr = [];
+
+	dataset.forEach(function(d) {
+		if (d.candidate == candidate) {
+			candidateArr.push(d);
+		}
+	})
+
+	colorCandidate.domain(d3.extent(candidateArr, function(d) {
+		return +d.prop;
+	}));
+
+
+	var censusMap = d3.map();
+
+	candidateArr.forEach(function(d) {
+		censusMap.set(d.state, d)
+	});
+
+	// loop through all of the path data, attaching the appropriate
+	// record to each one based on the name
+	for (var i = 0; i < mapInfo.features.length; i++) {
+		var name = mapInfo.features[i].properties.name;
+		//var date = mapInfo.features[i].properties.date;
+		mapInfo.features[i].properties.value = censusMap.get(name);
+	}
+	// create the states in the SVG
+	var states = svgMap.selectAll("path")
+		.data(mapInfo.features)
+		.enter()
+		.append("path")
+		.attr("d", path)
+		// style each state to set the fill color based on our metric
+	states.style("fill", function(d) {
+		if (d.properties.value) {
+			return colorCandidate(+d.properties.value.prop);
+		} else {
+			return "grey";
+		}
+
+	})
+
+	var tooltipLeft = -300;
+	var tooltipTop = -30;
+
+	states.on("mouseover", function(d) {
+
+			var mouse = d3.mouse(svgMap.node());
+			if (d.properties.value) {
+
+				tooltip.classed('hidden', false)
+					.attr('style', 'left:' + (mouse[0] - tooltipLeft) + 'px; top:' + (mouse[
+						1] - tooltipTop) + 'px')
+					.html("<b>" + d.properties.name + ": </b>" + d.properties.value.prop +
+						"%  <br> [" + d.properties.value.date + "]</br>");
+			} else {
+				tooltip.classed('hidden', false)
+					.attr('style', 'left:' + (mouse[0] - tooltipLeft) + 'px; top:' + (mouse[
+						1] - tooltipTop) + 'px')
+					.html("Candidate did not compete in this race");
+			}
+		})
+		.on('mousemove', function(d, i) {
+			var mouse = d3.mouse(svgMap.node());
+			tooltip.attr('style', 'left:' + (mouse[0] - tooltipLeft) + 'px; top:' + (
+				mouse[1] - tooltipTop) + 'px')
+
+		})
+		.on("mouseout", function(d) {
+			tooltip.classed('hidden', true)
+		})
+		.on("click", function(d, i) {
+			//date d.properties.value.date
+			svgTheme.selectAll("rect").style("opacity", 0);
+			var selector = "#rect" + d.properties.value.time_bucket
+			d3.select(selector).style("opacity", 0.1);
+			svgTheme.selectAll("path").remove();
+			draw(nestedDataState, d.properties.name);
+		});
+}
+		</script>
+	</body>
+</html>
